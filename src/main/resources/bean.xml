@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!--配置代理的service-->
+    <bean id="proxyAccountServie" factory-bean="beanFactory" factory-method="getAccountService"></bean>
+    <!--beanFactory-->
+    <bean id="beanFactory" class="com.hao.factory.BeanFactory">
+        <property name="txm" ref="txManager"></property>
+        <property name="accountService" ref="accountService"></property>
+    </bean>
+    <!--service-->
+    <bean id="accountService" class="com.hao.service.impl.AccountServiceImpl">
+        <property name="accountDao" ref="accountDao"></property>
+    </bean>
+
+    <!--dao-->
+    <bean id="accountDao" class="com.hao.dao.impl.AccountDaoImpl">
+        <!--注入queryRunner-->
+        <property name="queryRunner" ref="runner"></property>
+        <!--注入connectionUtils-->
+        <property name="connectionUtils" ref="connectionUtils"></property>
+    </bean>
+
+    <!--queryRunner，配置多例，避免单例堵塞-->
+    <bean id="runner" class="org.apache.commons.dbutils.QueryRunner" scope="prototype">
+    </bean>
+
+    <!--配置数据源-->
+    <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+        <!--连接数据库信息-->
+        <property name="driverClass" value="com.mysql.jdbc.Driver"></property>
+        <property name="jdbcUrl" value="jdbc:mysql://localhost:3306/test"></property>
+        <property name="user" value="root"></property>
+        <property name="password" value="mysql2233"></property>
+    </bean>
+
+    <!--配置ConnectionUtils-->
+    <bean id="connectionUtils" class="com.hao.utils.ConnectionUtils">
+        <property name="dataSource" ref="dataSource"></property>
+    </bean>
+    <!--配置事务管理器-->
+    <bean id="txManager" class="com.hao.utils.TransactionManager">
+        <property name="connectionUtils" ref="connectionUtils"></property>
+    </bean>
+</beans>
